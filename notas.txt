@@ -1,0 +1,2 @@
+Cada frase deve ter no maximo 13 linhas (cerca de 26 palavras)
+Caso a frase tenha foto, tentar limitar a 4 linhas (cerca de 10 palavras)

@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: "Space Grotesk", sans-serif;
+  background-color: #0a0a0a;
+  color: #f3f4f6;
+}
+
+@layer utilities {
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+  .animate-blink {
+    animation: blink 0.8s step-end infinite;
+  }
+
+  @keyframes loading {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(250%); }
+  }
+  .animate-loading-bar {
+    animation: loading 0.8s linear infinite;
+  }
+
+  @keyframes fadeInFromRight {
+    from { opacity: 0; transform: translateX(18px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeOutToLeft {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(-18px); }
+  }
+  @keyframes buttonsFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeInFromLeft {
+    from { opacity: 0; transform: translateX(-18px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes fadeOutToRight {
+    from { opacity: 1; transform: translateX(0); }
+    to   { opacity: 0; transform: translateX(18px); }
+  }
+
+  .fade-in-right { animation: fadeInFromRight 500ms ease forwards; }
+  .fade-out-left { animation: fadeOutToLeft 500ms ease forwards; }
+  .buttons-hidden { opacity: 0; pointer-events: none; transition: opacity 150ms ease; }
+  .buttons-fade-in { animation: buttonsFadeIn 300ms ease forwards; pointer-events: auto; }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.text-rotator-placeholder {
+  min-height: 3.5rem;
+}
+
+.fade-in-left { animation: fadeInFromLeft 500ms ease forwards; }
+.fade-out-right { animation: fadeOutToRight 500ms ease forwards; }
+
+.text-rotator-draggable {
+  touch-action: pan-y;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.text-rotator-draggable:active,
+.text-rotator-draggable.dragging {
+  cursor: grabbing;
+}
