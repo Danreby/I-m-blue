@@ -1,9 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import { RevealOnScroll } from "../RevealOnScroll";
-import TextRotator from "../common/buttons/TextRotator";
+import TextRotator, { buildGroupsFromLyrics } from "../common/buttons/TextRotator";
 
 export const Home = () => {
   const rotatorRef = useRef(null);
+  const [isStarted, setIsStarted] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   const [dateLife, setDateLife] = useState("");
   const [dateLifeAlone, setDateLifeAlone] = useState(0);
@@ -54,28 +56,75 @@ export const Home = () => {
     setDisplayDateLifeAloneExtense(`${yLabel}, ${mLabel} e ${dLabel}`);
   }, []);
 
-  const groups = [
-    {
-      text: `'im'`,
-      letterDelay: 40,
-      displayDuration: 3000,
-    },
-    {
-      text: `Sou desenvolvedor front-end com experiência em React e Inertia.`,
-      letterDelay: 50,
-      displayDuration: 3200,
-    },
-    {
-      text: `Atualmente: .`,
-      letterDelay: 45,
-      displayDuration: 2800,
-    },
-    { text: "E além... 🚀", letterDelay: 30, displayDuration: 2500 },
-  ];
+  const lyrics = `I'm good, yeah, I'm feelin' alright
+Baby, I'ma have the best fuckin' night of my life
+And wherever it takes me, I'm down for the ride
+Baby, don't you know I'm good?
+Yeah, I'm feelin' alright
 
-  const handleIndexChange = (idx) => {
-    // console.log('Texto atual', idx);
-  };
+'Cause I'm good, yeah, I'm feelin' alright
+Baby, I'ma have the best fuckin' night of my life
+And wherever it takes me, I'm down for the ride
+Baby, don't you know I'm good?
+Yeah, I'm feelin' alright
+
+Don't you know I'm good?
+Yeah, I'm feelin' alright
+
+You know I'm down for whatever tonight
+I don't need the finer things in life
+No matter where I go, it's a good time, yeah
+And I, I don't need to sit in VIP
+Middle of the floor, that's where I'll be
+Don't got a lot, but that's enough for me, yeah
+
+'Cause I'm good, yeah, I'm feelin' alright
+Baby, I'ma have the best fuckin' night of my life
+And wherever it takes me, I'm down for the ride
+Baby, don't you know I'm good?
+Yeah, I'm feelin' alright
+
+I'm good
+Good
+I'm good
+Don't you know I'm good?
+Yeah, I'm feelin' alright
+
+So I just let it go, let it go
+Oh, na, na, na, na, na
+No, I don't care no more, care no more
+Oh, na, na, na, na, na
+So come on, let me know, let me know
+Put your hands up, na, na, na
+No, baby, nothing's gonna stop us tonight
+
+'Cause I'm good, yeah, I'm feelin' alright
+Baby, I'ma have the best fuckin' night of my life
+And wherever it takes me, I'm down for the ride
+Baby, don't you know I'm good?
+Yeah, I'm feelin' alright`;
+
+  const groups = buildGroupsFromLyrics(lyrics, {
+    baseDisplayPerChar: 120,
+    minDisplay: 300,
+    defaultLetterDelay: 40,
+    pauseForLineBreaks: true,
+    lineBreakPause: 700,
+  });
+
+  function handleStart() {
+    if (!rotatorRef.current || typeof rotatorRef.current.startSequence !== "function") return;
+    setIsStarted(true);
+    rotatorRef.current.startSequence(0);
+  }
+
+  function handleOnIndexChange(idx) {
+    setCurrentIndex(idx);
+  }
+
+  function handleOnEnd() {
+    setIsStarted(false);
+  }
 
   return (
     <section id="home" className="min-h-screen flex items-center justify-center relative">
@@ -85,12 +134,26 @@ export const Home = () => {
             <TextRotator
               ref={rotatorRef}
               groups={groups}
-              defaultLetterDelay={45}
-              defaultDisplayDuration={2200}
-              transitionDuration={450}
-              mobileBreakpoint={768}
-              onIndexChange={handleIndexChange}
+              defaultLetterDelay={40}
+              defaultDisplayDuration={400}
+              transitionDuration={350}
+              onIndexChange={handleOnIndexChange}
+              onEnd={handleOnEnd}
             />
+          </div>
+
+          <div className="mt-6 flex items-center justify-center gap-4">
+            <button
+              onClick={handleStart}
+              disabled={isStarted}
+              className={`px-4 py-2 rounded-md text-white font-semibold transition ${isStarted ? 'opacity-50 cursor-not-allowed bg-gray-500' : 'bg-red-600 hover:bg-red-700'}`}
+            >
+              {isStarted ? 'Em execução...' : 'Iniciar sequência'}
+            </button>
+
+            <div className="text-sm text-gray-400 select-none">
+              Texto atual: {currentIndex + 1} / {groups.length}
+            </div>
           </div>
         </div>
       </RevealOnScroll>
