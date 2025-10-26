@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { TextRotator } from "../common/buttons/TextRotator";
 import { RevealOnScroll } from "../RevealOnScroll";
+import PlayIcon from "../common/icons/PlayIcon";
 
 export const Home = () => {
   const rotatorRef = useRef(null);
 
   const [isStarted, setIsStarted] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   const groups = [
     { text: "I'm", letterDelay: 1, displayDuration: 3 },
@@ -329,12 +329,8 @@ export const Home = () => {
               disabled={isStarted}
               className={`px-4 py-2 rounded-md text-white font-semibold transition ${isStarted ? 'opacity-50 cursor-not-allowed bg-gray-500' : 'bg-red-600 hover:bg-red-700'}`}
             >
-              {isStarted ? 'Em execução...' : 'Iniciar sequência'}
+              {isStarted ? <PlayIcon type={2} /> : <PlayIcon type={1} />}
             </button>
-
-            <div className="text-sm text-gray-400 select-none">
-              Texto atual: {currentIndex + 1} / {groups.length}
-            </div>
           </div>
         </div>
       </RevealOnScroll>
