@@ -1,15 +1,15 @@
-import React, { useEffect, useRef, useState } from "react";
-import { RevealOnScroll } from "../RevealOnScroll";
-import TextRotator, { buildGroupsFromLyrics } from "../common/buttons/TextRotator";
+import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
+import { TextRotator } from "../common/buttons/TextRotator";
+import { RevealOnScroll } from "../RevealOnScroll"; // mantém o mesmo import do seu projeto
 
 export const Home = () => {
   const rotatorRef = useRef(null);
-  const [isStarted, setIsStarted] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   const [dateLife, setDateLife] = useState("");
   const [dateLifeAlone, setDateLifeAlone] = useState(0);
   const [displayDateLifeAloneExtense, setDisplayDateLifeAloneExtense] = useState("");
+  const [isStarted, setIsStarted] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const startUTC = Date.UTC(2003, 3, 15);
@@ -56,61 +56,11 @@ export const Home = () => {
     setDisplayDateLifeAloneExtense(`${yLabel}, ${mLabel} e ${dLabel}`);
   }, []);
 
-  const lyrics = `I'm good, yeah, I'm feelin' alright
-Baby, I'ma have the best fuckin' night of my life
-And wherever it takes me, I'm down for the ride
-Baby, don't you know I'm good?
-Yeah, I'm feelin' alright
-
-'Cause I'm good, yeah, I'm feelin' alright
-Baby, I'ma have the best fuckin' night of my life
-And wherever it takes me, I'm down for the ride
-Baby, don't you know I'm good?
-Yeah, I'm feelin' alright
-
-Don't you know I'm good?
-Yeah, I'm feelin' alright
-
-You know I'm down for whatever tonight
-I don't need the finer things in life
-No matter where I go, it's a good time, yeah
-And I, I don't need to sit in VIP
-Middle of the floor, that's where I'll be
-Don't got a lot, but that's enough for me, yeah
-
-'Cause I'm good, yeah, I'm feelin' alright
-Baby, I'ma have the best fuckin' night of my life
-And wherever it takes me, I'm down for the ride
-Baby, don't you know I'm good?
-Yeah, I'm feelin' alright
-
-I'm good
-Good
-I'm good
-Don't you know I'm good?
-Yeah, I'm feelin' alright
-
-So I just let it go, let it go
-Oh, na, na, na, na, na
-No, I don't care no more, care no more
-Oh, na, na, na, na, na
-So come on, let me know, let me know
-Put your hands up, na, na, na
-No, baby, nothing's gonna stop us tonight
-
-'Cause I'm good, yeah, I'm feelin' alright
-Baby, I'ma have the best fuckin' night of my life
-And wherever it takes me, I'm down for the ride
-Baby, don't you know I'm good?
-Yeah, I'm feelin' alright`;
-
-  const groups = buildGroupsFromLyrics(lyrics, {
-    baseDisplayPerChar: 120,
-    minDisplay: 300,
-    defaultLetterDelay: 40,
-    pauseForLineBreaks: true,
-    lineBreakPause: 700,
-  });
+  const groups = [
+    { text: `Primeira linha — digitando devagar...`, letterDelay: 80, displayDuration: 1800 },
+    { text: `Segunda linha — digitando rápido.`, letterDelay: 25, displayDuration: 1200 },
+    { text: `E além... 🚀`, letterDelay: 50, displayDuration: 2000 },
+  ];
 
   function handleStart() {
     if (!rotatorRef.current || typeof rotatorRef.current.startSequence !== "function") return;
@@ -134,9 +84,9 @@ Yeah, I'm feelin' alright`;
             <TextRotator
               ref={rotatorRef}
               groups={groups}
-              defaultLetterDelay={40}
-              defaultDisplayDuration={400}
-              transitionDuration={350}
+              defaultLetterDelay={50}
+              defaultDisplayDuration={1500}
+              transitionDuration={450}
               onIndexChange={handleOnIndexChange}
               onEnd={handleOnEnd}
             />

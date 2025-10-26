@@ -1,57 +1,5 @@
 import React, { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 
-export function buildGroupsFromLyrics(lyrics, opts = {}) {
-  const {
-    baseDisplayPerChar = 120,
-    minDisplay = 250,
-    defaultLetterDelay = 50,
-    pauseForLineBreaks = true,
-    lineBreakPause = 700,
-    overridesByIndex = {},
-    overridesByWord = {},
-    trimWords = true,
-  } = opts;
-
-  const lines = lyrics.split(/\r?\n/);
-  const groups = [];
-
-  for (let li = 0; li < lines.length; li++) {
-    const line = lines[li];
-    if (!line.trim()) {
-      if (pauseForLineBreaks) {
-        groups.push({ text: "", letterDelay: 0, displayDuration: lineBreakPause, isPause: true });
-      }
-      continue;
-    }
-
-    const tokens = line.split(/\s+/);
-    for (let t = 0; t < tokens.length; t++) {
-      let word = tokens[t];
-      if (trimWords) word = word.trim();
-      if (word === "") continue;
-
-      const idx = groups.length;
-      const overridden = Object.prototype.hasOwnProperty.call(overridesByIndex, idx)
-        ? Number(overridesByIndex[idx])
-        : (Object.prototype.hasOwnProperty.call(overridesByWord, word) ? Number(overridesByWord[word]) : null);
-
-      const displayDuration = (overridden !== null && !Number.isNaN(overridden))
-        ? overridden
-        : Math.max(minDisplay, Math.ceil(word.length * baseDisplayPerChar));
-
-      const letterDelay = Math.max(10, Math.round(defaultLetterDelay - Math.log(Math.max(1, word.length)) * 6));
-
-      groups.push({ text: word, letterDelay, displayDuration });
-    }
-
-    if (pauseForLineBreaks && li < lines.length - 1) {
-      groups.push({ text: "", letterDelay: 0, displayDuration: Math.round(lineBreakPause / 2), isPause: true });
-    }
-  }
-
-  return groups;
-}
-
 export const TextRotator = forwardRef(({
   groups = [],
   defaultLetterDelay = 50,
@@ -67,8 +15,9 @@ export const TextRotator = forwardRef(({
   const [visibleText, setVisibleText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [animClass, setAnimClass] = useState("");
-  const mountedRef = useRef(true);
+  const [isRunning, setIsRunning] = useState(false);
 
+  const mountedRef = useRef(true);
   const typingTimerRef = useRef(null);
   const waitTimerRef = useRef(null);
 
@@ -77,10 +26,12 @@ export const TextRotator = forwardRef(({
       if (!groups || groups.length === 0) return;
       const idx = Math.max(0, Math.min(startIndex, groups.length - 1));
       setIndex(idx);
+      setIsRunning(true);
       setTimeout(() => typeGroup(idx), 20);
     },
     stopSequence: () => {
       clearAllTimers();
+      setIsRunning(false);
       setIsTyping(false);
     },
     getIndex: () => indexRef.current,
@@ -96,7 +47,9 @@ export const TextRotator = forwardRef(({
 
   useEffect(() => {
     if (typeof onIndexChange === "function") {
-      try { onIndexChange(index); } catch (err) {}
+      try {
+        onIndexChange(index);
+      } catch (err) {}
     }
   }, [index]);
 
@@ -120,20 +73,11 @@ export const TextRotator = forwardRef(({
     setVisibleText("");
     setIsTyping(true);
 
-    const letterDelay = typeof group.letterDelay === "number" ? group.letterDelay : defaultLetterDelay;
-    const displayDuration = typeof group.displayDuration === "number" ? group.displayDuration : defaultDisplayDuration;
-
     setAnimClass((prev) => (prev.includes("fade-in") ? prev : "fade-in-right"));
 
-    if (phrase === "") {
-      setIsTyping(false);
-      waitTimerRef.current = setTimeout(() => {
-        nextOrEnd(i);
-      }, displayDuration);
-      return;
-    }
-
     let pos = 0;
+    const letterDelay = typeof group.letterDelay === "number" ? group.letterDelay : defaultLetterDelay;
+
     function typeNext() {
       if (!mountedRef.current) return clearAllTimers();
       if (pos <= phrase.length) {
@@ -142,22 +86,26 @@ export const TextRotator = forwardRef(({
         typingTimerRef.current = setTimeout(typeNext, letterDelay);
       } else {
         setIsTyping(false);
-        waitTimerRef.current = setTimeout(() => {
-          nextOrEnd(i);
-        }, displayDuration);
+
+        setAnimClass("fade-in-right");
+
+        const displayDuration = typeof group.displayDuration === "number" ? group.displayDuration : defaultDisplayDuration;
+
+        if (i >= groups.length - 1) {
+          waitTimerRef.current = setTimeout(() => {
+            clearAllTimers();
+            setIsRunning(false);
+            if (typeof onEnd === "function") onEnd();
+          }, displayDuration);
+        } else {
+          waitTimerRef.current = setTimeout(() => {
+            goToIndex(i + 1, "next");
+          }, displayDuration);
+        }
       }
     }
 
     typeNext();
-  }
-
-  function nextOrEnd(i) {
-    if (!mountedRef.current) return;
-    if (i >= groups.length - 1) {
-      if (typeof onEnd === "function") onEnd();
-      return;
-    }
-    goToIndex(i + 1, "next");
   }
 
   function goToIndex(nextIndex, dir = "next") {
@@ -191,9 +139,9 @@ export const TextRotator = forwardRef(({
       <div className="mt-4 flex items-center justify-center" aria-hidden={isTyping}>
         {extras ? <div className="max-w-full">{extras}</div> : null}
       </div>
+
     </div>
   );
 });
 
 TextRotator.displayName = "TextRotator";
-export default TextRotator;
